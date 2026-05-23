@@ -1,6 +1,6 @@
 -- ============================================
 -- Scalpel — AI Sustainability Narrative Intelligence
--- Database Schema
+-- Supabase Database Schema
 -- ============================================
 
 -- Brands -------------------------------------
@@ -9,32 +9,32 @@ CREATE TABLE brands (
   slug TEXT NOT NULL UNIQUE,
   name TEXT NOT NULL,
   name_zh TEXT NOT NULL DEFAULT '',
-  logo_url TEXT,
-  description TEXT,
+  industry TEXT,
   website TEXT,
+  description TEXT,
+  logo_url TEXT,
   founded TEXT,
   headquarters TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Sources ------------------------------------
-CREATE TABLE sources (
+-- Analyses -----------------------------------
+CREATE TABLE analyses (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   brand_id UUID NOT NULL REFERENCES brands(id) ON DELETE CASCADE,
-  url TEXT NOT NULL,
-  title TEXT,
-  source_type TEXT NOT NULL DEFAULT 'website',
-  fetched_at TIMESTAMPTZ,
-  raw_content TEXT,
+  source_url TEXT NOT NULL DEFAULT '',
+  raw_title TEXT NOT NULL DEFAULT '',
+  raw_content TEXT NOT NULL DEFAULT '',
+  brand_summary TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- Claims -------------------------------------
 CREATE TABLE claims (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  analysis_id UUID REFERENCES analyses(id) ON DELETE CASCADE,
   brand_id UUID NOT NULL REFERENCES brands(id) ON DELETE CASCADE,
-  source_id UUID REFERENCES sources(id) ON DELETE SET NULL,
   category TEXT NOT NULL,
   risk_level TEXT NOT NULL DEFAULT 'low',
   risk_labels TEXT[] NOT NULL DEFAULT '{}',
@@ -48,46 +48,48 @@ CREATE TABLE claims (
 -- Articles -----------------------------------
 CREATE TABLE articles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  analysis_id UUID REFERENCES analyses(id) ON DELETE SET NULL,
+  brand_id UUID NOT NULL REFERENCES brands(id) ON DELETE CASCADE,
   slug TEXT NOT NULL UNIQUE,
   title TEXT NOT NULL,
   subtitle TEXT,
-  featured_image TEXT,
-  body TEXT NOT NULL DEFAULT '',
   excerpt TEXT,
-  brand_ids UUID[] NOT NULL DEFAULT '{}',
-  claim_ids UUID[] NOT NULL DEFAULT '{}',
+  body TEXT NOT NULL DEFAULT '',
   tags TEXT[] NOT NULL DEFAULT '{}',
-  is_featured BOOLEAN NOT NULL DEFAULT false,
+  blocks JSONB NOT NULL DEFAULT '[]',
   is_investigation BOOLEAN NOT NULL DEFAULT false,
+  review_status TEXT NOT NULL DEFAULT 'pending',
+  review_note TEXT,
   published_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Analysis blocks (stored as JSON in articles for now, but available as a view)
-CREATE VIEW article_analyses AS
-SELECT
-  a.id AS article_id,
-  a.slug,
-  a.title,
-  a.body,
-  b.name AS brand_name,
-  b.slug AS brand_slug
-FROM articles a
-LEFT JOIN brands b ON b.id = ANY(a.brand_ids);
-
 -- Indexes ------------------------------------
 CREATE INDEX idx_claims_brand ON claims(brand_id);
+CREATE INDEX idx_claims_analysis ON claims(analysis_id);
 CREATE INDEX idx_claims_category ON claims(category);
 CREATE INDEX idx_claims_risk ON claims(risk_level);
-CREATE INDEX idx_sources_brand ON sources(brand_id);
-CREATE INDEX idx_articles_published ON articles(published_at DESC);
-CREATE INDEX idx_articles_featured ON articles(is_featured) WHERE is_featured = true;
-CREATE INDEX idx_articles_brands ON articles USING GIN(brand_ids);
-CREATE INDEX idx_articles_claims ON articles USING GIN(claim_ids);
+CREATE INDEX idx_analyses_brand ON analyses(brand_id);
+CREATE INDEX idx_articles_brand ON articles(brand_id);
+CREATE INDEX idx_articles_analysis ON articles(analysis_id);
+CREATE INDEX idx_articles_published ON articles(published_at DESC NULLS LAST);
+CREATE INDEX idx_articles_status ON articles(review_status);
 
--- Seed: MVP Brands ---------------------------
-INSERT INTO brands (slug, name, name_zh, website, description) VALUES
-  ('shein', 'SHEIN', '希音', 'https://www.shein.com', 'Global fast-fashion e-commerce platform. One of the most scrutinized brands in fashion sustainability.'),
-  ('anta', 'Anta Sports', '安踏体育', 'https://www.anta.com', 'China''s largest sportswear company by market cap. Aggressive sustainability push with eco-product lines.'),
-  ('bosideng', 'Bosideng', '波司登', 'https://www.bosideng.com', 'China''s largest down apparel brand. Pioneering sustainable down sourcing and carbon neutrality claims.');
+-- Seed: 15 MVP Brands ------------------------
+INSERT INTO brands (slug, name, name_zh, website, industry, description) VALUES
+  ('shein', 'SHEIN', '希音', 'https://www.sheingroup.com', 'fast-fashion', 'Global fast-fashion e-commerce platform. Most scrutinized brand in fashion sustainability.'),
+  ('temu', 'Temu', '拼多多海外', 'https://www.temu.com', 'ecommerce', 'PDD Holdings cross-border e-commerce platform. Ultra-low-cost model with minimal ESG narrative.'),
+  ('ur', 'UR (Urban Revivo)', 'UR', 'https://www.urbanrevivo.com', 'fast-fashion', 'China''s fast-fashion export leader. Emerging ESG narrative with sustainable product lines.'),
+  ('peacebird', 'Peacebird', '太平鸟', 'https://www.peacebird.com', 'fashion', 'Youth-oriented Chinese fashion brand. Building sustainable product lines and circularity messaging.'),
+  ('anta', 'Anta Sports', '安踏体育', 'https://www.anta.com', 'sportswear', 'China''s largest sportswear company. Aggressive sustainability push with carbon neutrality targets.'),
+  ('lining', 'Li-Ning', '李宁', 'https://www.lining.com', 'sportswear', 'Iconic Chinese sportswear brand. Guochao pioneer with developing ESG communications.'),
+  ('xtep', 'Xtep', '特步', 'https://www.xtep.com', 'sportswear', 'Running-focused Chinese sportswear brand. Published sustainability reports with measurable targets.'),
+  ('bosideng', 'Bosideng', '波司登', 'https://www.bosideng.com', 'apparel', 'China''s largest down apparel brand. Leader in traceable down sourcing and carbon disclosure.'),
+  ('snowflying', 'Snow Flying', '雪中飞', 'https://www.snowflying.com', 'apparel', 'Bosideng''s mass-market down apparel sub-brand. Contrast value vs. parent brand ESG positioning.'),
+  ('miniso', 'Miniso', '名创优品', 'https://www.miniso.com', 'lifestyle', 'Global lifestyle retailer. Early-stage ESG narrative focused on sustainable sourcing and packaging.'),
+  ('popmart', 'Pop Mart', '泡泡玛特', 'https://www.popmart.com', 'lifestyle', 'Designer toy and pop culture brand. Emerging sustainability narrative around packaging and materials.'),
+  ('beneunder', 'Beneunder', '蕉下', 'https://www.beneunder.com', 'lifestyle', 'Sun-protective lifestyle brand. Eco-material claims and outdoor-sustainability positioning.'),
+  ('perfectdiary', 'Perfect Diary', '完美日记', 'https://www.perfectdiary.com', 'beauty', 'Yatsen Holding''s flagship beauty brand. ESG reporting aligned with HKEX disclosure requirements.'),
+  ('florasis', 'Florasis', '花西子', 'https://www.florasis.com', 'beauty', 'C-beauty brand built on Eastern aesthetics. Clean beauty and sustainable ingredient narrative.'),
+  ('proya', 'Proya', '珀莱雅', 'https://www.proya.com', 'beauty', 'A-share listed beauty leader. Expanding ESG disclosure with sustainability product lines.');
