@@ -1,0 +1,107 @@
+[
+  {
+    "id": "b-001", "slug": "shein", "name": "SHEIN", "name_zh": "希音",
+    "website": "https://www.sheingroup.com", "industry": "fast-fashion",
+    "description": "Global fast-fashion e-commerce platform. Most scrutinized brand in fashion sustainability.",
+    "logo_url": null, "founded": "2008", "headquarters": "Singapore/Guangzhou",
+    "created_at": "2026-05-20T00:00:00Z", "updated_at": "2026-05-20T00:00:00Z"
+  },
+  {
+    "id": "b-002", "slug": "temu", "name": "Temu", "name_zh": "拼多多海外",
+    "website": "https://www.temu.com", "industry": "ecommerce",
+    "description": "PDD Holdings' cross-border e-commerce platform. Ultra-low-cost model with minimal ESG narrative.",
+    "logo_url": null, "founded": "2022", "headquarters": "Boston/Guangzhou",
+    "created_at": "2026-05-23T00:00:00Z", "updated_at": "2026-05-23T00:00:00Z"
+  },
+  {
+    "id": "b-003", "slug": "ur", "name": "UR (Urban Revivo)", "name_zh": "UR",
+    "website": "https://www.urbanrevivo.com", "industry": "fast-fashion",
+    "description": "China's fast-fashion export leader. Emerging ESG narrative with sustainable product lines.",
+    "logo_url": null, "founded": "2006", "headquarters": "Guangzhou",
+    "created_at": "2026-05-23T00:00:00Z", "updated_at": "2026-05-23T00:00:00Z"
+  },
+  {
+    "id": "b-004", "slug": "peacebird", "name": "Peacebird", "name_zh": "太平鸟",
+    "website": "https://www.peacebird.com", "industry": "fashion",
+    "description": "Youth-oriented Chinese fashion brand. Building sustainable product lines and circularity messaging.",
+    "logo_url": null, "founded": "1996", "headquarters": "Ningbo",
+    "created_at": "2026-05-23T00:00:00Z", "updated_at": "2026-05-23T00:00:00Z"
+  },
+  {
+    "id": "b-005", "slug": "anta", "name": "Anta Sports", "name_zh": "安踏体育",
+    "website": "https://www.anta.com", "industry": "sportswear",
+    "description": "China's largest sportswear company. Aggressive sustainability push with carbon neutrality targets.",
+    "logo_url": null, "founded": "1991", "headquarters": "Jinjiang, Fujian",
+    "created_at": "2026-05-20T00:00:00Z", "updated_at": "2026-05-20T00:00:00Z"
+  },
+  {
+    "id": "b-006", "slug": "lining", "name": "Li-Ning", "name_zh": "李宁",
+    "website": "https://www.lining.com", "industry": "sportswear",
+    "description": "Iconic Chinese sportswear brand. Guochao pioneer with developing ESG communications.",
+    "logo_url": null, "founded": "1990", "headquarters": "Beijing",
+    "created_at": "2026-05-23T00:00:00Z", "updated_at": "2026-05-23T00:00:00Z"
+  },
+  {
+    "id": "b-007", "slug": "xtep", "name": "Xtep", "name_zh": "特步",
+    "website": "https://www.xtep.com", "industry": "sportswear",
+    "description": "Running-focused Chinese sportswear brand. Published sustainability reports with measurable targets.",
+    "logo_url": null, "founded": "2001", "headquarters": "Jinjiang, Fujian",
+    "created_at": "2026-05-23T00:00:00Z", "updated_at": "2026-05-23T00:00:00Z"
+  },
+  {
+    "id": "b-008", "slug": "bosideng", "name": "Bosideng", "name_zh": "波司登",
+    "website": "https://www.bosideng.com", "industry": "apparel",
+    "description": "China's largest down apparel brand. Leader in traceable down sourcing and carbon disclosure.",
+    "logo_url": null, "founded": "1976", "headquarters": "Shanghai",
+    "created_at": "2026-05-20T00:00:00Z", "updated_at": "2026-05-20T00:00:00Z"
+  },
+  {
+    "id": "b-009", "slug": "snowflying", "name": "Snow Flying", "name_zh": "雪中飞",
+    "website": "https://www.snowflying.com", "industry": "apparel",
+    "description": "Bosideng's mass-market down apparel sub-brand. Contrast value vs. parent brand ESG positioning.",
+    "logo_url": null, "founded": "1999", "headquarters": "Shanghai",
+    "created_at": "2026-05-23T00:00:00Z", "updated_at": "2026-05-23T00:00:00Z"
+  },
+  {
+    "id": "b-010", "slug": "miniso", "name": "Miniso", "name_zh": "名创优品",
+    "website": "https://www.miniso.com", "industry": "lifestyle",
+    "description": "Global lifestyle retailer. Early-stage ESG narrative focused on sustainable sourcing and packaging.",
+    "logo_url": null, "founded": "2013", "headquarters": "Guangzhou",
+    "created_at": "2026-05-23T00:00:00Z", "updated_at": "2026-05-23T00:00:00Z"
+  },
+  {
+    "id": "b-011", "slug": "popmart", "name": "Pop Mart", "name_zh": "泡泡玛特",
+    "website": "https://www.popmart.com", "industry": "lifestyle",
+    "description": "Designer toy and pop culture brand. Emerging sustainability narrative around packaging and materials.",
+    "logo_url": null, "founded": "2010", "headquarters": "Beijing",
+    "created_at": "2026-05-23T00:00:00Z", "updated_at": "2026-05-23T00:00:00Z"
+  },
+  {
+    "id": "b-012", "slug": "beneunder", "name": "Beneunder", "name_zh": "蕉下",
+    "website": "https://www.beneunder.com", "industry": "lifestyle",
+    "description": "Sun-protective lifestyle brand. Eco-material claims and outdoor-sustainability positioning.",
+    "logo_url": null, "founded": "2013", "headquarters": "Shenzhen",
+    "created_at": "2026-05-23T00:00:00Z", "updated_at": "2026-05-23T00:00:00Z"
+  },
+  {
+    "id": "b-013", "slug": "perfectdiary", "name": "Perfect Diary", "name_zh": "完美日记",
+    "website": "https://www.perfectdiary.com", "industry": "beauty",
+    "description": "Yatsen Holding's flagship beauty brand. ESG reporting aligned with HKEX disclosure requirements.",
+    "logo_url": null, "founded": "2017", "headquarters": "Guangzhou",
+    "created_at": "2026-05-23T00:00:00Z", "updated_at": "2026-05-23T00:00:00Z"
+  },
+  {
+    "id": "b-014", "slug": "florasis", "name": "Florasis", "name_zh": "花西子",
+    "website": "https://www.florasis.com", "industry": "beauty",
+    "description": "C-beauty brand built on Eastern aesthetics. Clean beauty and sustainable ingredient narrative.",
+    "logo_url": null, "founded": "2017", "headquarters": "Hangzhou",
+    "created_at": "2026-05-23T00:00:00Z", "updated_at": "2026-05-23T00:00:00Z"
+  },
+  {
+    "id": "b-015", "slug": "proya", "name": "Proya", "name_zh": "珀莱雅",
+    "website": "https://www.proya.com", "industry": "beauty",
+    "description": "A-share listed beauty leader. Expanding ESG disclosure with sustainability product lines.",
+    "logo_url": null, "founded": "2006", "headquarters": "Hangzhou",
+    "created_at": "2026-05-23T00:00:00Z", "updated_at": "2026-05-23T00:00:00Z"
+  }
+]

@@ -33,6 +33,13 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# runtime data (seed config only — brands.json is committed)
+/data/analyses.json
+/data/articles.json
+/data/claims.json
+/data/monitoring.json
+/data/inquiries.json
+
 # vercel
 .vercel
 
