@@ -113,7 +113,7 @@ export async function POST(request: Request) {
       (c) => c.risk_level === "high" || c.risk_level === "critical",
     ).length;
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3001";
-    sendReviewNotification(
+    await sendReviewNotification(
       "maxiqin1027@gmail.com",
       brand.name,
       result.article.title,

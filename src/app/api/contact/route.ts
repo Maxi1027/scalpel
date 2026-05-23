@@ -43,8 +43,8 @@ export async function POST(request: Request) {
 
     console.log(`[Contact] New inquiry from ${name || email || "anonymous"}: ${message.slice(0, 100)}`);
 
-    // Send email notification
-    sendContactNotification(inquiry).catch((e) =>
+    // Send email notification (await so Vercel doesn't kill it)
+    await sendContactNotification(inquiry).catch((e) =>
       console.error("[Contact] Email notify failed:", e),
     );
 

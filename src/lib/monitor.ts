@@ -272,7 +272,7 @@ export async function runMonitor(options?: {
         const highRiskCount = analysisResult.claims.filter(
           (c) => c.risk_level === "high" || c.risk_level === "critical",
         ).length;
-        sendReviewNotification(
+        await sendReviewNotification(
           "maxiqin1027@gmail.com",
           brand.name,
           article.title,
