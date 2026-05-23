@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
+import { createClient } from "@supabase/supabase-js";
 import { sendContactNotification } from "@/lib/email";
+
+function getSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key);
+}
 
 export async function POST(request: Request) {
   try {
@@ -16,26 +22,24 @@ export async function POST(request: Request) {
     }
 
     const inquiry = {
-      id: crypto.randomUUID(),
       name: name?.trim() || null,
       email: email?.trim() || null,
       company: company?.trim() || null,
       message: message.trim(),
-      created_at: new Date().toISOString(),
       status: "new",
     };
 
-    // Save to JSON file
-    const filePath = path.join(process.cwd(), "data", "inquiries.json");
-    let inquiries: typeof inquiry[] = [];
-    try {
-      const raw = await fs.readFile(filePath, "utf-8");
-      inquiries = JSON.parse(raw);
-    } catch {
-      // file doesn't exist yet
+    // Save to Supabase
+    const supabase = getSupabase();
+    if (supabase) {
+      const { error } = await supabase.from("inquiries").insert(inquiry);
+      if (error) {
+        console.error("[Contact] Supabase insert error:", error.message);
+        throw new Error("Failed to save inquiry");
+      }
+    } else {
+      console.log("[Contact] No Supabase — inquiry not saved:", inquiry.message.slice(0, 80));
     }
-    inquiries.push(inquiry);
-    await fs.writeFile(filePath, JSON.stringify(inquiries, null, 2), "utf-8");
 
     console.log(`[Contact] New inquiry from ${name || email || "anonymous"}: ${message.slice(0, 100)}`);
 
