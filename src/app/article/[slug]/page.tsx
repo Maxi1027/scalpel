@@ -92,16 +92,11 @@ export default async function ArticlePage({
         {analysis?.source_url && (
           <div className="mt-3 flex items-center gap-2">
             <span className="text-[0.625rem] uppercase tracking-wider text-[var(--muted)]">
-              Source
+              Sources
             </span>
-            <a
-              href={analysis.source_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[0.625rem] text-[var(--accent-foreground)] hover:underline truncate max-w-md"
-            >
+            <span className="text-[0.625rem] text-[var(--accent-foreground)]">
               {analysis.source_url}
-            </a>
+            </span>
           </div>
         )}
       </div>
@@ -158,15 +153,7 @@ export default async function ArticlePage({
           </h3>
           {analysis?.source_url && (
             <p className="text-[0.625rem] text-[var(--muted)] mb-4">
-              All claims below were extracted from{" "}
-              <a
-                href={analysis.source_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[var(--accent-foreground)] hover:underline"
-              >
-                {analysis.source_url}
-              </a>
+              Data sources: {analysis.source_url}
             </p>
           )}
           <div className="space-y-3">
@@ -212,15 +199,7 @@ export default async function ArticlePage({
           </h3>
           {analysis?.source_url && (
             <p className="text-[0.625rem] text-[var(--muted)] mb-4">
-              Source:{" "}
-              <a
-                href={analysis.source_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[var(--accent-foreground)] hover:underline"
-              >
-                {analysis.source_url}
-              </a>
+              Data sources: {analysis.source_url}
             </p>
           )}
           <p className="text-sm text-[var(--muted)] leading-relaxed">

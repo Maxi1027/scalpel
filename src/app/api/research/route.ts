@@ -31,11 +31,15 @@ export async function POST(request: Request) {
     // Generate claims and article from research data
     const result = await analyzeBrandFromResearch(brief);
 
+    // Extract actual sources from the research brief
+    const sources = [...new Set(brief.datapoints.map((d) => d.source))];
+    const sourceList = sources.join(" | ");
+
     // Save analysis
     const analysis = await storage.createAnalysis({
       brand_id: brand.id,
-      source_url: "research-brief", // verified research, not a URL
-      raw_title: `Research Analysis: ${brand.name}`,
+      source_url: sourceList,
+      raw_title: brief.summary,
       raw_content: JSON.stringify(brief),
       brand_summary: null,
     });
