@@ -479,3 +479,185 @@ export async function analyzeBrandContent(
     },
   };
 }
+
+// ---- Research-Based Analysis (verified data, not scraped) -----
+
+export interface ResearchDataPoint {
+  metric: string;
+  currentValue: string;
+  targetValue: string;
+  targetYear: string;
+  source: string;
+  confidence: string;
+}
+
+export interface ResearchBrief {
+  brandName: string;
+  brandNameZh: string;
+  summary: string;
+  datapoints: ResearchDataPoint[];
+  gaps: { metric: string; status: string; impact: string }[];
+  peerComparison?: string;
+}
+
+const VERIFIED_CLAIMS_PROMPT = `You are an ESG analyst converting verified research data into structured claims.
+
+You will receive a RESEARCH BRIEF containing verified ESG data points for a brand. This data has been cross-referenced from multiple sources (ESG reports, third-party ratings, regulatory filings).
+
+CRITICAL RULES:
+1. Each claim MUST be directly traceable to a datapoint in the research brief
+2. Do NOT invent data, extrapolate beyond the brief, or fill gaps with assumptions
+3. For each claim, cite which source the data comes from
+4. If the research brief says a datapoint is "not found", create a DATA GAP claim
+5. Claims should be specific and data-rich
+
+For each claim:
+- claim_text: specific, data-backed statement
+- category: sustainability/carbon/material/circularity/nature_narrative
+- risk_level: low (verified+data-backed) / medium (partially verified) / high (data gap or unverified) / critical (contradiction)
+- risk_labels: from [verified_claim, data_backed, ambitious_target, data_gap, unverified_target, third_party_certified, industry_leading, industry_lagging, target_without_baseline, definitional_ambiguity]
+- confidence: 0.0-1.0 based on source reliability
+- source: which specific source(s)
+- context: surrounding facts
+- explanation: why this risk level
+
+Return ONLY valid JSON:
+{
+  "brand_summary": "2-3 sentences on ESG position based on verified data",
+  "claims": [
+    {
+      "claim_text": "...",
+      "category": "carbon",
+      "risk_level": "low",
+      "risk_labels": ["verified_claim", "data_backed"],
+      "confidence": 0.95,
+      "source": "2024 ESG Report, SBTi Dashboard",
+      "context": "...",
+      "explanation": "..."
+    }
+  ]
+}`;
+
+const RESEARCH_ARTICLE_PROMPT = `You are a sharp, analytical sustainability editor writing for SCALPEL.
+
+You will receive VERIFIED RESEARCH DATA for a brand. Every statement you make must be traceable to the data.
+
+=== TONE ===
+- Sharp and precise. "The data shows..." not "It seems..."
+- When data is missing, say so explicitly. Missing data is NOT zero.
+- When targets are ambitious but unverified, flag it
+- NEVER accuse fraud or use attack words
+- ALWAYS show the gap between targets and current data
+
+=== STRUCTURE (5 blocks) ===
+1. **Targets vs. Reality** — Data comparison: what's promised vs. what's measured
+2. **What the Data Shows** — Verified progress with evidence
+3. **Risk Signals** — Each with: description + evidence + confidence (🟢🟡🔴). Only include risks grounded in data
+4. **What's Not Being Said** — Data gaps and their significance
+5. **Observations** — Balanced assessment. What's credible, what needs watching
+
+=== RULES ===
+- Facts must be sourced. "According to the 2024 ESG report..."
+- Do NOT extrapolate beyond the research brief
+- Article 1500-2500 words, English only
+
+Return ONLY valid JSON:
+{
+  "title": "...",
+  "subtitle": "...",
+  "excerpt": "2-3 sentence summary",
+  "tags": ["tag1", "tag2"],
+  "is_investigation": true,
+  "body": "Full article in markdown",
+  "blocks": [
+    {"type": "narrative_breakdown", "heading": "Targets vs. Reality", "content": "..."},
+    {"type": "narrative_breakdown", "heading": "What the Data Shows", "content": "..."},
+    {"type": "risk_assessment", "heading": "Risk Signals", "content": "..."},
+    {"type": "language_analysis", "heading": "What's Not Being Said", "content": "..."},
+    {"type": "verdict", "heading": "Observations", "content": "..."}
+  ]
+}`;
+
+export async function analyzeBrandFromResearch(
+  brief: ResearchBrief,
+): Promise<{
+  claims: Omit<Claim, "id" | "brand_id" | "source_id" | "created_at">[];
+  article: {
+    title: string;
+    subtitle: string;
+    excerpt: string;
+    body: string;
+    tags: string[];
+    is_investigation: boolean;
+    blocks: AnalysisBlock[];
+  };
+}> {
+  const datapointsText = brief.datapoints
+    .map((d) => `- ${d.metric}: current=${d.currentValue}, target=${d.targetValue} (${d.targetYear}), source=${d.source}, confidence=${d.confidence}`)
+    .join("\n");
+  const gapsText = brief.gaps
+    .map((g) => `- ${g.metric}: ${g.status} (impact: ${g.impact})`)
+    .join("\n");
+  const briefText = `Brand: ${brief.brandName} (${brief.brandNameZh})
+
+Overview: ${brief.summary}
+
+VERIFIED DATAPOINTS:
+${datapointsText}
+
+DATA GAPS:
+${gapsText}
+${brief.peerComparison ? `\nPEER COMPARISON:\n${brief.peerComparison}` : ""}`;
+
+  // Step 1: Extract claims from verified data
+  const extRes = await getClient().chat.completions.create({
+    model: "deepseek-v4-pro",
+    messages: [
+      { role: "system", content: VERIFIED_CLAIMS_PROMPT },
+      { role: "user", content: briefText },
+    ],
+    temperature: 0.2,
+    response_format: { type: "json_object" },
+  });
+
+  const raw = extRes.choices[0]?.message?.content;
+  if (!raw) throw new Error("No response from AI extraction");
+  const extraction = JSON.parse(raw);
+  const claims = (extraction.claims || []).map((c: any) => ({
+    category: c.category as ClaimCategory,
+    risk_level: c.risk_level as RiskLevel,
+    risk_labels: c.risk_labels as RiskLabel[],
+    claim_text: c.claim_text,
+    context: c.context || c.source || null,
+    explanation: c.explanation || null,
+    confidence: c.confidence || 0.7,
+  }));
+
+  // Step 2: Write research article
+  const edRes = await getClient().chat.completions.create({
+    model: "deepseek-v4-pro",
+    messages: [
+      { role: "system", content: RESEARCH_ARTICLE_PROMPT },
+      { role: "user", content: `Research Brief for ${brief.brandName}:\n\n${briefText}\n\nVerified Claims:\n${JSON.stringify(extraction.claims || [], null, 2)}` },
+    ],
+    temperature: 0.7,
+    response_format: { type: "json_object" },
+  });
+
+  const edRaw = edRes.choices[0]?.message?.content;
+  if (!edRaw) throw new Error("No response from AI editorial generation");
+  const editorial = JSON.parse(edRaw);
+
+  return {
+    claims,
+    article: {
+      title: editorial.title,
+      subtitle: editorial.subtitle || null,
+      excerpt: editorial.excerpt || null,
+      body: editorial.body || "",
+      tags: editorial.tags || [],
+      is_investigation: editorial.is_investigation || false,
+      blocks: editorial.blocks || [],
+    },
+  };
+}
