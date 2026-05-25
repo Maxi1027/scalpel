@@ -21,6 +21,7 @@ export interface StorageInterface {
   createClaims(claims: Omit<StoredClaim, "id" | "created_at">[]): Promise<StoredClaim[]>;
   getClaimsByAnalysis(analysisId: string): Promise<StoredClaim[]>;
   getClaimsByBrand(brandId: string): Promise<StoredClaim[]>;
+  getAllClaims(): Promise<StoredClaim[]>;
 
   // -- Articles --
   createArticle(data: Omit<StoredArticle, "id" | "created_at" | "updated_at">): Promise<StoredArticle>;

@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { ArticleCard } from "@/components/ArticleCard";
 import storage from "@/lib/storage";
 
+export const dynamic = "force-dynamic";
+
 export default async function BrandPage({
   params,
 }: {

@@ -5,6 +5,8 @@ import type { StoredBrand, StoredClaim } from "@/lib/storage";
 import { CATEGORY_LABELS } from "@/types";
 import type { ClaimCategory } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 const CATEGORIES: ClaimCategory[] = [
   "sustainability",
   "circularity",
@@ -14,23 +16,29 @@ const CATEGORIES: ClaimCategory[] = [
 ];
 
 export default async function HomePage() {
-  // Pre-fetch all data
-  const brands = await storage.getBrands();
-  const published = await storage.getArticles({ status: "published" });
+  // Pre-fetch all data in 3 queries (down from 32)
+  const [brands, published, allClaimsData] = await Promise.all([
+    storage.getBrands(),
+    storage.getArticles({ status: "published" }),
+    storage.getAllClaims(),
+  ]);
+
   const featured = published.filter((a) => a.is_investigation);
   const latest = published.filter((a) => !a.is_investigation);
 
-  // Fetch claim counts per brand
+  // Group claims by brand in memory
   const brandClaims: Record<string, StoredClaim[]> = {};
-  for (const brand of brands) {
-    brandClaims[brand.id] = await storage.getClaimsByBrand(brand.id);
+  for (const claim of allClaimsData) {
+    if (!brandClaims[claim.brand_id]) brandClaims[claim.brand_id] = [];
+    brandClaims[claim.brand_id].push(claim);
   }
 
-  // Fetch article counts per brand
+  // Group article counts by brand slug in memory
+  const brandSlugMap = new Map(brands.map((b) => [b.id, b.slug]));
   const brandArticleCounts: Record<string, number> = {};
-  for (const brand of brands) {
-    const articles = await storage.getArticlesByBrandSlug(brand.slug);
-    brandArticleCounts[brand.slug] = articles.length;
+  for (const article of published) {
+    const slug = brandSlugMap.get(article.brand_id);
+    if (slug) brandArticleCounts[slug] = (brandArticleCounts[slug] || 0) + 1;
   }
 
   const allClaims = Object.values(brandClaims).flat();

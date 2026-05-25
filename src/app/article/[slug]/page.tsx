@@ -4,6 +4,8 @@ import { AnalysisBlock } from "@/components/AnalysisBlock";
 import storage from "@/lib/storage";
 import { RISK_LABELS } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 function cleanMarkdown(text: string): string {
   return text
     .replace(/\*\*(.+?)\*\*/g, "$1")

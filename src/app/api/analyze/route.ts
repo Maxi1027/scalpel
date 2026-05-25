@@ -1,26 +1,11 @@
 import { NextResponse } from "next/server";
 import { scrapeUrl } from "@/lib/scraper";
 import { analyzeBrandContent } from "@/lib/analyzer";
+import { discoverEsgUrls } from "@/lib/monitor";
 import storage from "@/lib/storage";
 import { sendReviewNotification } from "@/lib/email";
 
-const DEFAULT_URLS: Record<string, string[]> = {
-  shein: ["https://www.sheingroup.com/sustainability"],
-  temu: ["https://www.temu.com/sustainability.html"],
-  ur: ["https://www.urbanrevivo.com/en/sustainability"],
-  peacebird: ["https://www.peacebird.com"],
-  anta: ["https://ir.anta.com/en/esg"],
-  lining: ["https://www.lining.com"],
-  xtep: ["https://www.xtep.com"],
-  bosideng: ["https://www.bosideng.com/en"],
-  snowflying: ["https://www.snowflying.com"],
-  miniso: ["https://www.miniso.com/social/"],
-  popmart: ["https://www.popmart.com"],
-  beneunder: ["https://www.beneunder.com"],
-  perfectdiary: ["https://www.perfectdiary.com"],
-  florasis: ["https://www.florasis.com"],
-  proya: ["https://www.proya.com"],
-};
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   try {
@@ -41,13 +26,18 @@ export async function POST(request: Request) {
       );
     }
 
-    const urls = DEFAULT_URLS[brand_slug] || [];
-    const targetUrl = url || urls[0];
+    // Discover ESG URLs or use the explicit one provided
+    let targetUrl = url;
     if (!targetUrl) {
-      return NextResponse.json(
-        { success: false, error: `No URL configured for: ${brand_slug}` },
-        { status: 400 },
-      );
+      if (brand.website) {
+        const discovered = await discoverEsgUrls(brand_slug, brand.website, []);
+        targetUrl = discovered[0]?.url || brand.website;
+      } else {
+        return NextResponse.json(
+          { success: false, error: `No website configured for: ${brand_slug}` },
+          { status: 400 },
+        );
+      }
     }
 
     // Step 1 — Scrape

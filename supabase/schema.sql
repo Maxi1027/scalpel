@@ -65,7 +65,23 @@ CREATE TABLE articles (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Monitor State -------------------------------
+CREATE TABLE IF NOT EXISTS monitor_state (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  brand_slug TEXT NOT NULL,
+  url TEXT NOT NULL,
+  last_content_hash TEXT,
+  last_scraped_at TIMESTAMPTZ,
+  last_analysis_id UUID REFERENCES articles(id) ON DELETE SET NULL,
+  last_change_detected_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(brand_slug, url)
+);
+
 -- Indexes ------------------------------------
+CREATE INDEX IF NOT EXISTS idx_monitor_state_brand ON monitor_state(brand_slug);
+CREATE INDEX IF NOT EXISTS idx_monitor_state_scraped ON monitor_state(last_scraped_at DESC NULLS LAST);
 CREATE INDEX idx_claims_brand ON claims(brand_id);
 CREATE INDEX idx_claims_analysis ON claims(analysis_id);
 CREATE INDEX idx_claims_category ON claims(category);

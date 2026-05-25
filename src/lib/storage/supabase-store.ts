@@ -101,6 +101,15 @@ export class SupabaseStorage implements StorageInterface {
     return (data || []) as StoredClaim[];
   }
 
+  async getAllClaims(): Promise<StoredClaim[]> {
+    const { data } = await getClient()
+      .from("claims")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(5000);
+    return (data || []) as StoredClaim[];
+  }
+
   // -- Articles --
 
   async createArticle(

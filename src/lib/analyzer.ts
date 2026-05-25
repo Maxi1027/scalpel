@@ -11,11 +11,29 @@ function getClient() {
 // ---- Prompt Templates ------------------------------------
 
 const EXTRACT_PROMPT = `You are an ESG forensic analyst specializing in Chinese fashion and consumer brands.
-Your job is to extract sustainability-related claims from brand communications and analyze them critically.
+Your job is to extract ONLY genuine sustainability/ESG claims from brand communications.
 
-Given the text content from a brand's webpage, you must:
+CRITICAL FILTER: You MUST reject (do NOT extract) the following:
+- Pure product marketing slogans (e.g., "lightweight", "stylish", "new collection", "trendy")
+- Generic brand taglines with no sustainability dimension
+- Descriptions of product features that aren't environmental/social claims
+- Event promotions, seasonal campaigns, or fashion show announcements
+- Vague words like "innovation", "quality", "craftsmanship" without sustainability context
 
-1. **Extract** every sustainability, environmental, ethical, or circularity-related claim
+ONLY extract claims that make a specific assertion about:
+- Environmental impact, carbon footprint, or climate action
+- Sustainable materials, sourcing, or supply chain practices
+- Circular economy, recycling, or waste reduction
+- Social responsibility, labor practices, or community impact
+- Third-party certifications (GOTS, GRS, Oeko-Tex, B Corp, etc.)
+- Specific sustainability targets, goals, or commitments with timelines
+- Biodiversity, water stewardship, or chemical management
+
+If the page contains NO genuine sustainability claims, return an empty claims array. It is BETTER to return zero claims than to extract marketing fluff as if it were ESG data.
+
+For each valid claim:
+
+1. **Extract** the exact claim text
 2. **Classify** each claim into one of these categories:
    - sustainability: generic sustainability/ESG claims (sustainable, eco-friendly, green, responsible, conscious)
    - circularity: claims about circular economy, recycling, closed-loop (circular, recyclable, recycled, loop, take-back)
@@ -105,9 +123,16 @@ You will receive content from MULTIPLE sources for the same brand — for exampl
 - The brand's full ESG report (PDF)
 - Press releases, campaign pages, etc.
 
-Your job is to extract and cross-reference sustainability claims ACROSS ALL SOURCES.
+CRITICAL FILTER: You MUST reject (do NOT extract) the following:
+- Pure product marketing slogans (e.g., "lightweight", "stylish", "new collection")
+- Generic brand taglines with no sustainability dimension
+- Descriptions of product features that aren't environmental/social claims
+- Event promotions, seasonal campaigns, or fashion show announcements
+- Vague words like "innovation", "quality", "craftsmanship" without sustainability context
 
-For each claim you find:
+ONLY extract claims that make a specific assertion about environmental impact, sustainable materials, circular economy, social responsibility, certifications, or specific sustainability targets. If a source contains NO genuine sustainability claims, return zero claims from it. It is BETTER to return zero claims than to extract marketing fluff as ESG data.
+
+For each valid claim:
 1. **Extract** the exact claim text
 2. **Note which source** it came from (label the source)
 3. **Classify** into: sustainability, circularity, material, carbon, nature_narrative

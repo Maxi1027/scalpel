@@ -9,7 +9,7 @@ const SECRET = new TextEncoder().encode(
 const COOKIE_NAME = "scalpel-review-session";
 const ALLOWED = ["maxiqin1027@gmail.com"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Only protect /review routes (except login page and API)
   const { pathname } = request.nextUrl;
 

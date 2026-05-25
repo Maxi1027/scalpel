@@ -107,6 +107,11 @@ export class JsonStorage implements StorageInterface {
       .sort((a, b) => b.created_at.localeCompare(a.created_at));
   }
 
+  async getAllClaims(): Promise<StoredClaim[]> {
+    const claims = await readTable<StoredClaim>("claims");
+    return claims.sort((a, b) => b.created_at.localeCompare(a.created_at));
+  }
+
   // -- Articles --
 
   async createArticle(
